@@ -30,6 +30,10 @@ module Zucchini
       app_path
     end
 
+    def self.app_args
+      @@config['app_args']
+    end
+
     def self.resolution_name(dimension)
       @@config['resolutions'][dimension.to_i]
     end

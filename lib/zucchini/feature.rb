@@ -68,7 +68,7 @@ class Zucchini::Feature
         @js_stdout = `instruments #{device_params(@device)} \
                -t "#{Zucchini::Config.template}" "#{Zucchini::Config.app}" \
                -e UIASCRIPT "#{compile_js(@device[:orientation])}" \
-               -e UIARESULTSPATH "#{run_data_path}" 2>&1`
+               -e UIARESULTSPATH "#{run_data_path}" #{Zucchini::Config.app_args} 2>&1`
         puts @js_stdout
         # Hack. Instruments don't issue error return codes when JS exceptions occur
         @js_exception = true if (@js_stdout.match /JavaScript error/) || (@js_stdout.match /Instruments\ .{0,5}\ Error\ :/ )
