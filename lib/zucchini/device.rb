@@ -8,7 +8,7 @@ module Zucchini
     def device_params(device)
       if is_simulator?(device)
         set_simulator_device(device)
-        ''
+        "-w \"#{device[:simulator]}\""
       else
         "-w #{device[:udid]}"
       end
