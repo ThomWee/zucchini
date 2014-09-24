@@ -63,6 +63,7 @@ module Zucchini
       sim = `xcode-select -print-path`.gsub(/\n/, '') + "/Applications/iOS\\ Simulator.app"
       puts "-- start simulator"
       `open #{sim}`
+      sleep(5)
     end
 
     def stop_active_simulator()
