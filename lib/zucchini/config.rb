@@ -3,6 +3,14 @@ require 'yaml'
 module Zucchini
   class Config
 
+    def self.sim_guid
+      @@sim_guid
+    end
+    
+    def self.sim_guid=(guid)
+      @@sim_guid = guid
+    end
+
     def self.base_path
       @@base_path
     end
@@ -22,12 +30,17 @@ module Zucchini
     def self.app
       device_name  = ENV['ZUCCHINI_DEVICE'] || @@default_device_name
       device       = devices[device_name]
-      app_path     = File.absolute_path(device['app'] || @@config['app'] || ENV['ZUCCHINI_APP'])
+      
+      if !device['bundle_id'].nil?
+        device['bundle_id']
+      else
+        app_path = File.absolute_path(device['app'] || @@config['app'] || ENV['ZUCCHINI_APP'])
 
-      if (device_name == 'iOS Simulator' || device['simulator']) && !File.exists?(app_path)
-        raise "Can't find application at path #{app_path}"
+        if (device_name == 'iOS Simulator' || device['simulator']) && !File.exists?(app_path)
+          raise "Can't find application at path #{app_path}"
+        end
+        app_path
       end
-      app_path
     end
 
     def self.app_args
@@ -55,7 +68,13 @@ module Zucchini
         :udid        => device['UDID'],
         :screen      => device['screen'],
         :simulator   => device['simulator'],
-        :orientation => device['orientation'] || 'portrait'
+        :orientation => device['orientation'] || 'portrait',
+        
+        :os_ver_id   => device['os_ver_id'],
+        :sim_id      => device['sim_id'],
+        :bunlde_id   => device['bundle_id'],
+        :install_src => device['install_src'],
+        :os_version  => device['os_version']
       }
     end
 
@@ -64,7 +83,11 @@ module Zucchini
         `xcode-select -print-path`.gsub(/\n/, '') + "/Platforms/iPhoneOS.platform/Developer/Library/Instruments",
          "/Applications/Xcode.app/Contents/Applications/Instruments.app/Contents" # Xcode 4.5
       ].map do |start_path|
-        "#{start_path}/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
+        path = "#{start_path}/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
+        if !File.directory?(path)
+          path = "#{start_path}/PlugIns/AutomationInstrument.xrplugin/Contents/Resources/Automation.tracetemplate"
+        end
+        path
       end
 
       locations.each { |path| return path if File.exists?(path) }

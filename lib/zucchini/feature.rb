@@ -43,6 +43,7 @@ class Zucchini::Feature
     log = Zucchini::Log.new(run_path) if process && Zucchini::Log.exists?(run_path)
     
     @screenshots ||= Dir.glob("#{run_path}/*.png").sort.map do |file|
+      p file
       next unless Zucchini::Screenshot.valid?(file)
 
       screenshot = Zucchini::Screenshot.new(file, @device, log)
@@ -52,6 +53,8 @@ class Zucchini::Feature
       end
       screenshot
     end.compact + unmatched_pending_screenshots
+    
+    p @screenshots
   end
 
   def stats
@@ -69,12 +72,12 @@ class Zucchini::Feature
 
       @js_stdout = nil
       begin
-          @js_stdout = Timeout::timeout(timeout) {
-            `instruments #{device_params(@device)} \
-               -t "#{Zucchini::Config.template}" "#{Zucchini::Config.app}" \
-               -e UIASCRIPT "#{compile_js(@device[:orientation])}" \
-               -e UIARESULTSPATH "#{run_data_path}" #{Zucchini::Config.app_args} 2>&1`
-          }
+        @js_stdout = Timeout::timeout(timeout) {
+          `instruments #{device_params(@device)} \
+             -t "#{Zucchini::Config.template}" "#{Zucchini::Config.app}" \
+             -e UIASCRIPT "#{compile_js(@device[:orientation])}" \
+             -e UIARESULTSPATH "#{run_data_path}" #{Zucchini::Config.app_args} 2>&1`
+        }
         puts @js_stdout
         # Hack. Instruments don't issue error return codes when JS exceptions occur
         @js_exception = true if (@js_stdout.match /JavaScript error/) || (@js_stdout.match /Instruments\ .{0,5}\ Error\ :/ )
