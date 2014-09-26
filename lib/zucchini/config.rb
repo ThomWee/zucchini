@@ -4,7 +4,8 @@ module Zucchini
   class Config
 
     def self.sim_guid
-      @@sim_guid
+      device_name  = ENV['ZUCCHINI_DEVICE'] || @@default_device_name
+      devices[device_name]["simulator"] || @@sim_guid
     end
     
     def self.sim_guid=(guid)

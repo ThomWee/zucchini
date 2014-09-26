@@ -15,12 +15,12 @@ class Zucchini::Runner < Zucchini::Detector
     retry_attempts = Zucchini::Config.retry_attempts
     feature_timeout = Zucchini::Config.feature_timeout
 
-    if @device[:sim_id]
-      stop_active_simulator()
-      install_sim(@device[:os_ver_id], @device[:sim_id])
-      install_app(File.absolute_path(@device[:install_src]))
-    end
     if is_simulator? @device
+      if @device[:sim_id]
+        install_sim(@device[:os_ver_id], @device[:sim_id])
+      end
+
+      install_app(File.absolute_path(@device[:install_src]))
       start_simulator(@device)
     end
 

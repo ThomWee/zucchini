@@ -36,6 +36,7 @@ module Zucchini
       simctl = `xcode-select -print-path`.gsub(/\n/, '') + "/usr/bin/simctl"
       if File.exists?(simctl)
         puts "- intall app into simulator"
+        stop_active_simulator()
         `#{simctl} boot #{Zucchini::Config.sim_guid}`
         `#{simctl} install #{Zucchini::Config.sim_guid} "#{app_src}"`
         `#{simctl} shutdown #{Zucchini::Config.sim_guid}`
@@ -46,11 +47,7 @@ module Zucchini
 
     def device_params(device)
       if is_simulator?(device)
-        if defined? Zucchini::Config.sim_guid
-          "-w \"#{device[:simulator]}\""
-        else
-          "-w #{Zucchini::Config.sim_guid}"
-        end
+        "-w #{Zucchini::Config.sim_guid}"
       else
         "-w #{device[:udid]}"
       end
@@ -61,9 +58,9 @@ module Zucchini
     end
 
     def start_simulator(device)
-      if simulator_pid.nil?
-        dev_id = device[:simulator] || Zucchini::Config.sim_guid
+      if simulator_pid.empty?
         puts "-- set startup if for simulator"
+        dev_id = Zucchini::Config.sim_guid
         `defaults write com.apple.iphonesimulator CurrentDeviceUDID #{dev_id}`
         sim = `xcode-select -print-path`.gsub(/\n/, '') + "/Applications/iOS\\ Simulator.app"
         puts "-- start simulator"
@@ -73,11 +70,12 @@ module Zucchini
     end
 
     def stop_active_simulator()
+      puts simulator_pid.empty?
       Process.kill('INT', simulator_pid.to_i) unless simulator_pid.empty?
     end
 
     def is_simulator?(device)
-      device[:name] == 'iOS Simulator' || device[:simulator] || defined? Zucchini::Config.sim_guid
+      device[:name] == 'iOS Simulator' || defined? Zucchini::Config.sim_guid
     end
   end
 end
