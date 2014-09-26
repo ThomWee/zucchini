@@ -5,11 +5,11 @@ module Zucchini
 
     def self.sim_guid
       device_name  = ENV['ZUCCHINI_DEVICE'] || @@default_device_name
-      devices[device_name]["simulator"] || @@sim_guid
+      devices[device_name]['simulator'] || @sim_guid
     end
     
     def self.sim_guid=(guid)
-      @@sim_guid = guid
+      @sim_guid = guid
     end
 
     def self.base_path
