@@ -9,34 +9,38 @@ module Zucchini
         puts "--- install Zucchini simulator ---"
         Zucchini::Config.sim_guid = `#{simctl} list | grep Zucchini_Simulator | sed "s/[^(]*(\\([^)]*\\)).*/\\1/"`.split(/\r?\n/).last
         
-        if Zucchini::Config.sim_guid.nil?
-          Zucchini::Config.sim_guid = `#{simctl} create Zucchini_Simulator #{device_type} #{os_ver}`.chomp
-          puts "- created #{Zucchini::Config.sim_guid}"
-        else
-          puts "- reuse earlier created simulator (#{Zucchini::Config.sim_guid})"
-          stop_active_simulator()
-          sleep(1)
-          `#{simctl} erase #{Zucchini::Config.sim_guid}`
+        if !Zucchini::Config.sim_guid.nil?
+          puts "- delete earlier created simulator (#{Zucchini::Config.sim_guid})"
+          uninstall_sim
         end
+        
+        Zucchini::Config.sim_guid = `#{simctl} create Zucchini_Simulator #{device_type} #{os_ver}`.chomp
+        puts "- created #{Zucchini::Config.sim_guid}"
       end
     end
 
     def uninstall_sim
       stop_active_simulator()
+      sleep(1)
       simctl = `xcode-select -print-path`.gsub(/\n/, '') + "/usr/bin/simctl"
       if File.exists?(simctl)
         puts "--- remove Zucchini simulator ---"
-        puts Timeout::timeout(10) {
-          `#{simctl} delete #{Zucchini::Config.sim_guid}`
-        }
+        begin
+          puts Timeout::timeout(30) {
+            `#{simctl} delete #{Zucchini::Config.sim_guid}`
+          }
+        
+        rescue Timeout::Error
+          puts "- timed out to delete simulator #{Zucchini::Config.sim_guid}"
+        end
       end
     end
 
     def install_app(app_src)
       simctl = `xcode-select -print-path`.gsub(/\n/, '') + "/usr/bin/simctl"
       if File.exists?(simctl)
-        puts "- intall app into simulator #{Zucchini::Config.sim_guid}"
         stop_active_simulator()
+        puts "- intall app into simulator #{Zucchini::Config.sim_guid}"
         `#{simctl} boot #{Zucchini::Config.sim_guid}`
         `#{simctl} install #{Zucchini::Config.sim_guid} "#{app_src}"`
         `#{simctl} shutdown #{Zucchini::Config.sim_guid}`
@@ -67,12 +71,13 @@ module Zucchini
       sleep(5)
     end
 
-    def stop_active_simulator
+    def stop_active_simulator()
       unless simulator_pid().empty?
+        puts "- stop simulator"
         Process.kill('INT', simulator_pid().to_i) 
-        while not simulator_pid().empty?
-          sleep(1)
-        end
+        begin
+          sleep(0.5)
+        end while simulator_pid().nil?
       end
     end
 

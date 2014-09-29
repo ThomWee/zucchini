@@ -67,7 +67,7 @@ class Zucchini::Feature
         current_attempt = attempt + 1
         `rm -rf #{run_data_path}/*`
 
-        @js_exception == false
+        @js_exception = false
         begin
           @js_stdout =[]
           Timeout::timeout(timeout) {
@@ -83,16 +83,15 @@ class Zucchini::Feature
             # we have not timed out so lets jump out of retry
             break
           end
-          rescue Timeout::Error
+        rescue Timeout::Error
+            @js_exception = true
             puts "Attempt #{current_attempt} timed out"
             # need to look into recovering from instruments crash potentially?
         ensure
           `rm -rf instrumentscli*.trace`
           Zucchini::Log.parse_automation_log(run_path)
         end
-
       end
-      @js_exception = true
     end
   end
 

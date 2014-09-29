@@ -17,7 +17,6 @@ class Zucchini::Runner < Zucchini::Detector
 
     if is_simulator? @device
       if @device[:sim_id]
-        stop_active_simulator()
         install_sim(@device[:os_ver_id], @device[:sim_id])
       end
 
