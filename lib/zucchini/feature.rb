@@ -71,10 +71,11 @@ class Zucchini::Feature
         begin
           @js_stdout =[]
           Timeout::timeout(timeout) {
-            IO.popen("instruments #{device_params(@device)} -t \"#{Zucchini::Config.template}\" \"#{Zucchini::Config.app}\" -e UIASCRIPT \"#{compile_js(@device[:orientation])}\" -e UIARESULTSPATH \"#{run_data_path}\" #{Zucchini::Config.app_args} 2>&1").each do |line|
+            IO.popen("instruments #{device_params(@device)} -t \"#{Zucchini::Config.template}\" \"#{Zucchini::Config.app}\" -e UIASCRIPT \"#{compile_js(@device[:orientation])}\" -e UIARESULTSPATH \"#{run_data_path}\" #{Zucchini::Config.app_args}", 
+                     :err=>[:child, :out]).each do |line|
                
                puts line.chomp
-               @js_exception = true if (line.match /JavaScript error/) || (line.match /Instruments\ .{0,5}\ Error\ :/ )
+               @js_exception = true if (line.match /JavaScript error/) || (line.match /Instruments\ .{0,5}\ Error\ :/ ) || (line.match /Fail: The target application appears to have died/)
             end
           }
           # Hack. Instruments don't issue error return codes when JS exceptions occur
