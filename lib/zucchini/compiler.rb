@@ -11,14 +11,14 @@ module Zucchini
       js_path  = "#{run_data_path}/feature.js"
       lib_path = File.expand_path(File.dirname(__FILE__))
 
-      coffee_src_paths = [
-        "#{lib_path}/uia",
-        "#{Zucchini::Config.base_path}/support/screens",
-        "#{Zucchini::Config.base_path}/support/lib",
+      coffee_src_paths = Dir.glob([
+        "#{lib_path}/uia/**/*.coffee",
+        "#{Zucchini::Config.base_path}/support/lib/*.coffee",
+        "#{Zucchini::Config.base_path}/support/screens/*.coffee",
         feature_coffee("#{path}/feature.zucchini", orientation)
-      ].select { |p| File.exists? p }.join ' '
+      ]).join ' '
 
-      "coffee -o #{run_data_path} -j #{js_path} -c #{coffee_src_paths}".tap do |cmd|
+      "cat #{coffee_src_paths} | coffee --compile --stdio > #{js_path}".tap do |cmd|
         raise "Error compiling a feature file: #{cmd}" unless system(cmd)
       end
 
