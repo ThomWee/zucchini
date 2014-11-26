@@ -7,6 +7,11 @@ module Zucchini
       @@base_path
     end
 
+    def self.sim_guid
+      device_name  = ENV['ZUCCHINI_DEVICE'] || @@default_device_name
+      devices[device_name]['simulator'] || devices[device_name]['udid']
+    end
+
     def self.base_path=(base_path)
       @@base_path = base_path
       @@config    = YAML::load(ERB::new(File::read("#{base_path}/support/config.yml")).result)
