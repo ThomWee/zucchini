@@ -30,7 +30,7 @@ module Zucchini
     end
 
     def start_simulator(device_id)
-      if "xcrun simctl list | grep \"#{device_id}.*Booted\"".empty?
+      if `xcrun simctl list | grep \"#{device_id}.*Booted\"`.empty?
         puts "-- set startup if for simulator"
         `defaults write com.apple.iphonesimulator CurrentDeviceUDID #{device_id}`
         sim = `xcode-select -print-path`.gsub(/\n/, '') + "/Applications/iOS\\ Simulator.app"
