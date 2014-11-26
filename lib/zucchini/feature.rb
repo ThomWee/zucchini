@@ -69,6 +69,9 @@ class Zucchini::Feature
 
       @js_stdout = nil
       begin
+        p "instruments #{device_params(@device)} -t \"#{Zucchini::Config.template}\" \"#{@device[:bundle_id]}\" -e UIASCRIPT \"#{compile_js(@device[:orientation])}\" -e UIARESULTSPATH \"#{run_data_path}\" #{Zucchini::Config.app_args} 2>&1"
+
+        
           @js_stdout = Timeout::timeout(timeout) {
             `instruments #{device_params(@device)} \
                -t "#{Zucchini::Config.template}" "#{Zucchini::Config.app}" \

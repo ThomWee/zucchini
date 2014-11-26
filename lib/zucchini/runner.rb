@@ -1,4 +1,6 @@
 class Zucchini::Runner < Zucchini::Detector
+  include Zucchini::Device
+
   parameter "PATH", "a path to feature or a directory"
 
   option %W(-c --collect), :flag, "only collect the screenshots from the device"
@@ -12,6 +14,10 @@ class Zucchini::Runner < Zucchini::Detector
     compare_threads = {}
     retry_attempts = Zucchini::Config.retry_attempts
     feature_timeout = Zucchini::Config.feature_timeout
+
+    start_simulator(@device[:simulator] || @device[:udid]) if @device[:simulator]
+    uninstall_app(@device[:simulator] || @device[:udid], @device[:bundle_id])
+    install_app(@device[:simulator] || @device[:udid], Zucchini::Config.app)
 
     features.each do |f|
       puts "------- starting feature #{f.name}---------"

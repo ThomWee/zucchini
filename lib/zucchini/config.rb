@@ -55,7 +55,8 @@ module Zucchini
         :udid        => device['UDID'],
         :screen      => device['screen'],
         :simulator   => device['simulator'],
-        :orientation => device['orientation'] || 'portrait'
+        :orientation => device['orientation'] || 'portrait',
+        :bundle_id   => device['bundle_id']
       }
     end
 
