@@ -39,6 +39,13 @@ module Zucchini
         sleep(5)
       end
     end
+    
+    def self.guid_of_device(name)
+      cmd_result = `instruments -s devices | grep \"#{name}\"`
+      raise "Unable to get GUID for device named #{name}" if cmd_result.empty?
+      
+      /[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}/.match(cmd_result)[0]
+    end
 
     def stop_active_simulator()
       unless simulator_pid().empty?

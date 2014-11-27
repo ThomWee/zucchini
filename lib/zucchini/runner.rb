@@ -15,9 +15,10 @@ class Zucchini::Runner < Zucchini::Detector
     retry_attempts = Zucchini::Config.retry_attempts
     feature_timeout = Zucchini::Config.feature_timeout
 
-    start_simulator(@device[:simulator] || @device[:udid]) unless @device[:simulator].empty?
-    uninstall_app(@device[:simulator] || @device[:udid], @device[:bundle_id])
-    install_app(@device[:simulator] || @device[:udid], Zucchini::Config.app)
+    stop_active_simulator()
+    start_simulator(Zucchini::Config.sim_guid) unless @device[:simulator].empty?
+    uninstall_app(Zucchini::Config.sim_guid, @device[:bundle_id])
+    install_app(Zucchini::Config.sim_guid, Zucchini::Config.app)
 
     features.each do |f|
       puts "------- starting feature #{f.name}---------"

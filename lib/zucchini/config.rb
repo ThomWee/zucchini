@@ -2,14 +2,24 @@ require 'yaml'
 
 module Zucchini
   class Config
-
+    
     def self.base_path
       @@base_path
     end
 
     def self.sim_guid
-      device_name  = ENV['ZUCCHINI_DEVICE'] || @@default_device_name
-      devices[device_name]['simulator'] || devices[device_name]['udid']
+      if @sim_guid.nil?
+        device_name  = ENV['ZUCCHINI_DEVICE'] || @@default_device_name
+        name = devices[device_name]['simulator'] || devices[device_name]['udid']
+
+        if (name =~ /^[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}$/)
+          @sim_guid = name
+        else
+          @sim_guid = Device.guid_of_device(name)
+        end
+      end
+      
+      @sim_guid
     end
 
     def self.base_path=(base_path)
