@@ -2,14 +2,24 @@ require 'yaml'
 
 module Zucchini
   class Config
-
+    
     def self.base_path
       @@base_path
     end
 
     def self.sim_guid
-      device_name  = ENV['ZUCCHINI_DEVICE'] || @@default_device_name
-      devices[device_name]['simulator'] || devices[device_name]['udid']
+      if @sim_guid.nil?
+        device_name  = ENV['ZUCCHINI_DEVICE'] || @@default_device_name
+        name = devices[device_name]['simulator'] || devices[device_name]['udid']
+
+        if (name =~ /^[A-F0-9]{8}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{4}-[A-F0-9]{12}$/)
+          @sim_guid = name
+        else
+          @sim_guid = Device.guid_of_device(name)
+        end
+      end
+      
+      @sim_guid
     end
 
     def self.base_path=(base_path)
@@ -70,7 +80,11 @@ module Zucchini
         `xcode-select -print-path`.gsub(/\n/, '') + "/Platforms/iPhoneOS.platform/Developer/Library/Instruments",
          "/Applications/Xcode.app/Contents/Applications/Instruments.app/Contents" # Xcode 4.5
       ].map do |start_path|
-        "#{start_path}/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
+        path = "#{start_path}/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
+        if !File.directory?(path)
+          path = "#{start_path}/PlugIns/AutomationInstrument.xrplugin/Contents/Resources/Automation.tracetemplate"
+        end
+        path
       end
 
       locations.each { |path| return path if File.exists?(path) }
