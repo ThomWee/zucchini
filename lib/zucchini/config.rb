@@ -70,7 +70,11 @@ module Zucchini
         `xcode-select -print-path`.gsub(/\n/, '') + "/Platforms/iPhoneOS.platform/Developer/Library/Instruments",
          "/Applications/Xcode.app/Contents/Applications/Instruments.app/Contents" # Xcode 4.5
       ].map do |start_path|
-        "#{start_path}/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
+        path = "#{start_path}/PlugIns/AutomationInstrument.bundle/Contents/Resources/Automation.tracetemplate"
+        if !File.directory?(path)
+          path = "#{start_path}/PlugIns/AutomationInstrument.xrplugin/Contents/Resources/Automation.tracetemplate"
+        end
+        path
       end
 
       locations.each { |path| return path if File.exists?(path) }
