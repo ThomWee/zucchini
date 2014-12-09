@@ -22,5 +22,5 @@ class Zucchini::Report
 
   def open; system "open #{@paths[:html]}"; end
 
-  def log(buf); puts buf; end
+  def log(buf); end
 end

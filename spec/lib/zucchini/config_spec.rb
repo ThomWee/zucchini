@@ -29,7 +29,7 @@ describe Zucchini::Config do
 
     context "device present in config.yml" do
       it "should return the device hash" do
-        Zucchini::Config.device("My iDevice").should eq({:name =>"My iDevice", :udid =>"lolffb28d74a6fraj2156090784avasc50725dd0", :screen =>"ipad_ios5", :simulator=>nil, :orientation=> 'portrait'})
+        Zucchini::Config.device("My iDevice").should eq({:name =>"My iDevice", :udid =>"lolffb28d74a6fraj2156090784avasc50725dd0", :screen =>"ipad_ios5", :simulator=>nil, :orientation=> 'portrait', :bundle_id=> 'de.my.app'})
       end
     end
 

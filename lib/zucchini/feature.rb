@@ -9,6 +9,7 @@ class Zucchini::Feature
   attr_accessor :stats
   attr_accessor :js_exception
   attr_accessor :js_stdout
+  attr_accessor :js_duration
 
   attr_reader :succeeded
   attr_reader :name
@@ -19,7 +20,8 @@ class Zucchini::Feature
     @device       = nil
     @succeeded    = false
     @js_exception = false
-    @js_stdout = nil
+    @js_stdout    = nil
+    @js_duration  = 0
   end
 
   def run_data_path
@@ -72,15 +74,21 @@ class Zucchini::Feature
           @js_stdout =[]
           Timeout::timeout(timeout) {
             IO.popen("instruments #{device_params(@device)} -t \"#{Zucchini::Config.template}\" \"#{Zucchini::Config.app}\" -e UIASCRIPT \"#{compile_js(@device[:orientation])}\" -e UIARESULTSPATH \"#{run_data_path}\" #{Zucchini::Config.app_args}", 
-                     :err=>[:child, :out]).each do |line|
-               
-               puts line.chomp
-               @js_exception = true if (line.match /JavaScript error/) || (line.match /Instruments\ .{0,5}\ Error\ :/ ) || (line.match /Fail: The target application appears to have died/)
+                    :err=>[:child, :out]).each do |line|
+              
+              puts line.chomp
+              match = /^.*\+[0-9]{4} (.*)$/.match(line.chomp)
+              line = (match ? match[1] : line.chomp)
+              
+              @js_stdout << line
+              @js_exception = true if (line.match /JavaScript error/) || (line.match /Instruments\ .{0,5}\ Error\ :/ ) || (line.match /Fail: The target application appears to have died/)
             end
           }
+          @js_duration = /\(Duration : (.*)s;/.match(@js_stdout.pop)[1].to_f.ceil
           # Hack. Instruments don't issue error return codes when JS exceptions occur
           if @js_exception == false
             puts "Attempt #{current_attempt} completed"
+            @succeeded = true
             # we have not timed out so lets jump out of retry
             break
           end

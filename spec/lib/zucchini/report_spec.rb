@@ -20,6 +20,7 @@ describe Zucchini::Report do
     feature.device = device
     feature.stub!(:screenshots).and_return(fake_screenshots)
     feature.send('js_exception='.to_sym, true)
+    feature.send('js_duration='.to_sym, 10)
     feature
   end
 
@@ -31,7 +32,7 @@ describe Zucchini::Report do
   end
   after { FileUtils.rm_rf(reports_dir) }
 
-  it "should produce a a correct HTML report" do
+  it "should produce a correct HTML report" do
     report = File.read("#{reports_dir}/zucchini_report.html")
     report.scan(/<dl class="passed.*screen/).length.should eq 4
     report.scan(/<dl class="failed.*screen/).length.should eq 3
@@ -60,6 +61,7 @@ describe Zucchini::Report do
 
     report.scan(/<testsuite id/).length.should eq 1
     report.scan(/<testcase/).length.should eq 8
+    report.scan(/<testsuite.*time="10"/).length.should eq 1
 
   end
 end
