@@ -61,8 +61,8 @@ module Zucchini::Reporter
           suite.add_child(test_case)
         end
 
-        stdout = (f.succeeded ? f.js_stdout : '')
-        stderr = (!f.succeeded ? f.js_stdout : '')
+        stdout = (f.succeeded ? f.js_stdout.join("\n") : '')
+        stderr = (!f.succeeded ? f.js_stdout.join("\n") : '')
 
         suite.add_child("<system-out>#{doc.create_cdata(stdout)}</system-out>")
         suite.add_child("<system-err>#{doc.create_cdata(stderr)}</system-err>")
