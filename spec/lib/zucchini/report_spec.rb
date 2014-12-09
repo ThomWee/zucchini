@@ -31,7 +31,7 @@ describe Zucchini::Report do
   end
   after { FileUtils.rm_rf(reports_dir) }
 
-  it "should produce a a correct HTML report" do
+  it "should produce a correct HTML report" do
     report = File.read("#{reports_dir}/zucchini_report.html")
     report.scan(/<dl class="passed.*screen/).length.should eq 4
     report.scan(/<dl class="failed.*screen/).length.should eq 3
