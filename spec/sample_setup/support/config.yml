@@ -4,9 +4,9 @@ devices:
   My iDevice:
     UDID  : lolffb28d74a6fraj2156090784avasc50725dd0
     screen: ipad_ios5
+    bundle_id: de.my.app
 
   Default Device:
     screen : low_ios5
     default: true
     UDID: <%= "something" + "_from_erb" %>
-
