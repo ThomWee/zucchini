@@ -9,7 +9,6 @@ class Zucchini::Feature
   attr_accessor :stats
   attr_accessor :js_exception
   attr_accessor :js_stdout
-  attr_accessor :js_duration
 
   attr_reader :succeeded
   attr_reader :name
@@ -21,7 +20,6 @@ class Zucchini::Feature
     @succeeded    = false
     @js_exception = false
     @js_stdout    = nil
-    @js_duration  = 0
   end
 
   def run_data_path
@@ -84,7 +82,6 @@ class Zucchini::Feature
               @js_exception = true if (line.match /JavaScript error/) || (line.match /Instruments\ .{0,5}\ Error\ :/ ) || (line.match /Fail: The target application appears to have died/)
             end
           }
-          @js_duration = /\(Duration : (.*)s;/.match(@js_stdout.pop)[1].to_f.ceil
           # Hack. Instruments don't issue error return codes when JS exceptions occur
           if @js_exception == false
             puts "Attempt #{current_attempt} completed"
