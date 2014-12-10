@@ -20,7 +20,7 @@ module Zucchini::Reporter
         suite['tests'] = 1 + f.stats[:failed].length + f.stats[:passed].length #add 1 for whether or not js completed successfully
         suite['failures'] = f.stats[:failed].length
         suite['errors'] = (f.js_exception ? 1 : 0)
-        suite['time'] = 0
+        suite['time'] = (f.js_duration ? f.js_duration : 0)
         suite['timestamp'] = Time.now.utc.iso8601.gsub!(/Z$/, '')
 
         suite_props = Nokogiri::XML::Element.new('properties', doc)

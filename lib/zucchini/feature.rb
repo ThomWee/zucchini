@@ -9,6 +9,7 @@ class Zucchini::Feature
   attr_accessor :stats
   attr_accessor :js_exception
   attr_accessor :js_stdout
+  attr_accessor :js_duration
 
   attr_reader :succeeded
   attr_reader :name
@@ -19,7 +20,8 @@ class Zucchini::Feature
     @device       = nil
     @succeeded    = false
     @js_exception = false
-    @js_stdout = nil
+    @js_stdout    = nil
+    @js_duration  = 0
   end
 
   def run_data_path
