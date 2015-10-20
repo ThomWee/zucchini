@@ -26,16 +26,14 @@ module Zucchini
     end
 
     def simulator_pid
-      `ps ax|awk '/iOS Simulator.app\\/Contents\\/MacOS\\/iOS Simulator/{print $1}'`.chomp
+      `ps ax|awk '/Simulator.app\\/Contents\\/MacOS\\/Simulator/{print $1}'`.chomp
     end
 
     def start_simulator(device_id)
       if `xcrun simctl list | grep \"#{device_id}.*Booted\"`.empty?
         puts "-- set startup if for simulator"
-        `defaults write com.apple.iphonesimulator CurrentDeviceUDID #{device_id}`
-        sim = `xcode-select -print-path`.gsub(/\n/, '') + "/Applications/iOS\\ Simulator.app"
         puts "-- start simulator"
-        `open #{sim}`
+        `open -a "Simulator" --args -CurrentDeviceUDID #{device_id}`
         sleep(5)
       end
     end
