@@ -1,4 +1,5 @@
 require 'timeout'
+require 'open3'
 
 class Zucchini::Feature
   include Zucchini::Compiler
@@ -73,16 +74,18 @@ class Zucchini::Feature
         begin
           @js_stdout =[]
           Timeout::timeout(timeout) {
-            IO.popen("instruments #{device_params(@device)} -t \"#{Zucchini::Config.template}\" \"#{Zucchini::Config.app}\" -e UIASCRIPT \"#{compile_js(@device[:orientation])}\" -e UIARESULTSPATH \"#{run_data_path}\" #{Zucchini::Config.app_args}", 
-                    :err=>[:child, :out]).each do |line|
-              
-              puts line.chomp
-              match = /^.*\+[0-9]{4} (.*)$/.match(line.chomp)
-              line = (match ? match[1] : line.chomp)
-              
-              @js_stdout << line
-              @js_exception = true if (line.match /JavaScript error/) || (line.match /Instruments\ .{0,5}\ Error\ :/ ) || (line.match /Fail: The target application appears to have died/)
-            end
+            Open3.popen2e("instruments #{device_params(@device)} -t \"#{Zucchini::Config.template}\" \"#{Zucchini::Config.app}\" -e UIASCRIPT \"#{compile_js(@device[:orientation])}\" -e UIARESULTSPATH \"#{run_data_path}\" #{Zucchini::Config.app_args}") { |stdin, stdout_err, wait_thr|
+              stdin.close
+
+              while line = stdout_err.gets
+                puts line.chomp
+                match = /^.*\+[0-9]{4} (.*)$/.match(line.chomp)
+                line = (match ? match[1] : line.chomp)
+
+                @js_stdout << line
+                @js_exception = true if (line.match /JavaScript error/) || (line.match /Instruments\ .{0,5}\ Error\ :/ ) || (line.match /Fail: The target application appears to have died/)
+              end
+            }
           }
           @js_duration = /\(Duration : (.*)s;/.match(@js_stdout.pop)[1].to_f.ceil
           # Hack. Instruments don't issue error return codes when JS exceptions occur
